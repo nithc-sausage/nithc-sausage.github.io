@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bootstrap demo</title>
+  <link href="./bootstrap-5.3.0-dist/css/bootstrap.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <div class="Title">
+    <div class="container-sm">
+      <div class="row gy-3">
+        <figure class="text-center">
+          <blockquote class="blockquote">
+            <h1>北辰寮　北人狼</h1>
+          </blockquote>
+          <figcaption class="blockquote-footer">
+            寮則違反者はこの中にいる <cite title="Source Title">on 2024</cite>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div class="row gx-3">
+      <select class="form-select" aria-label="Default select example" onchange="setPlayerStates(this.value)">
+        <option selected>Select the number of players</option>
+        <option value="5">5人</option>
+        <option value="6">6人</option>
+        <option value="7">7人</option>
+        <option value="8">8人</option>
+        <option value="9">9人</option>
+        <option value="10">10人</option>
+      </select>
+    </div>
+
+    <div class="text-center gy-3">
+      <button type="button" class="btn btn-primary" onclick="startGame()">
+        Game start
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // 初期化
+    sessionStorage.setItem("day", 0);
+    sessionStorage.setItem("dead", 0);
+    sessionStorage.setItem("game", 0);
+    sessionStorage.setItem("currentPlayer",1);
+    sessionStorage.removeItem("votes");
+
+    // プレイヤーデータをセッションストレージに保存
+    function setPlayerStates(playersCount) {
+      const players = [];
+      for (let i = 1; i <= playersCount; i++) {
+        players.push({
+          id: i,
+          yakushoku: "", // 初期役職
+          status: "alive" // 生存状態
+        });
+      }
+      sessionStorage.setItem("players", JSON.stringify(players));
+      console.log("Players saved:", players);
+    }
+
+    // ゲーム開始
+    function startGame() {
+      const players = JSON.parse(sessionStorage.getItem("players"));
+      if (!players || players.length === 0) {
+        alert("プレイヤー人数を選択してください。");
+        return;
+      }
+      // 次のページに遷移
+      window.location.href = "./yakushoku.html";
+    }
+  </script>
+
+
+</html>

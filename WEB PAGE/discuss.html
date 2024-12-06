@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="./bootstrap-5.3.0-dist/css/bootstrap.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="Title">
+        <div class="container-sm">
+            <div class="row gy-3">
+                <figure class="text-center">
+                    <blockquote class="blockquote">
+                        <h1>北辰寮　北人狼</h1>
+                    </blockquote>
+                    <figcaption class="blockquote-footer">
+                        寮則違反者はこの中にいる <cite title="Source Title">on 2024</cite>
+                    </figcaption>
+                </figure>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        // カウントダウン処理
+        let countdownInterval; // カウントダウンのインターバルを管理する変数
+
+        function startCountdown(seconds) {
+            let counter = seconds;
+            countdownInterval = setInterval(() => {
+                document.getElementById('countdown').textContent = counter;
+                counter--;
+                if (counter < 0) {
+                    clearInterval(countdownInterval);
+                    // 本人確認ページに戻る
+                    location.href = "./confirmation.html?nx=speech"; // 個人会議
+                }
+            }, 1000);
+        }
+
+    </script>
+
+    <body onload="startCountdown(10)"> <!-- 3分のカウントダウン -->
+        <div class="row gy-3">
+            <div class="text-center">
+                <h5>
+                    DAY2
+                </h5>
+                <h3>
+                    全体会議
+                </h3>
+            </div>
+        </div>
+
+        <div>
+            <h1>ページが<span id="countdown">180</span>秒後に遷移します。</h1>
+        </div>
+    </body>
+
+
+
+
+
+
+
+
+
+</body>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="./bootstrap-5.3.0-dist/css/bootstrap.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="Title">
+        <div class="container-sm">
+            <div class="row gy-3">
+                <figure class="text-center">
+                    <blockquote class="blockquote">
+                        <h1>北辰寮　北人狼</h1>
+                    </blockquote>
+                    <figcaption class="blockquote-footer">
+                        寮則違反者はこの中にいる <cite title="Source Title">on 2024</cite>
+                    </figcaption>
+                </figure>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // 現在のプレイヤー番号を取得または初期化
+        const currentPlayer = sessionStorage.getItem("currentPlayer")
+            ? parseInt(sessionStorage.getItem("currentPlayer"))
+            : 1;
+    
+        // 次のプレイヤー番号を設定
+        function nextPlayer() {
+            const currentPlayer = sessionStorage.getItem("currentPlayer")
+                ? parseInt(sessionStorage.getItem("currentPlayer"))
+                : 1;
+    
+            const nextPlayer = currentPlayer + 1;
+    
+            if (nextPlayer > 8) {
+                sessionStorage.removeItem("currentPlayer"); // リセット
+                location.href = "./discuss.html";
+                return;
+            }
+    
+            // 次のプレイヤー番号をセッションストレージに保存
+            sessionStorage.setItem("currentPlayer", nextPlayer);
+    
+            // 本人確認ページに戻る
+            location.href = "./confirmation.html?nx=speech10";
+        }
+    
+        // カウントダウン処理
+        let countdownInterval; // カウントダウンのインターバルを管理する変数
+    
+        function startCountdown(seconds) {
+            let counter = seconds;
+            countdownInterval = setInterval(() => {
+                document.getElementById('countdown').textContent = counter;
+                counter--;
+                if (counter < 0) {
+                    clearInterval(countdownInterval);
+                    nextPlayer(); // 次のプレイヤーに進む
+                }
+            }, 1000);
+        }
+    
+        // スキップボタンを押した時の動作
+        function skipCountdown() {
+            clearInterval(countdownInterval); // カウントダウンを停止
+            nextPlayer(); // 次のプレイヤーに進む
+        }
+    </script>
+    
+    <body onload="startCountdown(10)"> <!-- 10秒のカウントダウン -->
+        <div class="text-center gy-3">
+            <h1>ページが<span id="countdown">10</span>秒後に遷移します。</h1>
+            <button onclick="skipCountdown()">スキップ</button> <!-- スキップボタン -->
+        </div>
+    </body>
+    
+
+
+
+
+
+
+
+
+</body>

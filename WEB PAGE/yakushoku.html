@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="./bootstrap-5.3.0-dist/css/bootstrap.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="container-sm">
+        <div class="row gy-3">
+            <figure class="text-center">
+                <blockquote class="blockquote">
+                    <h1>北辰寮　北人狼</h1>
+                </blockquote>
+                <figcaption class="blockquote-footer">
+                    寮則違反者はこの中にいる <cite title="Source Title">on 2024</cite>
+                </figcaption>
+            </figure>
+        </div>
+
+        <div class="row gy-3">
+            <div class="text-center">
+                <h5>
+                    DAY<span id="day"></span>
+                </h5>
+                <h3>
+                    夜が来ました。
+                </h3>
+                <h5>
+                    役職公開＆行動選択
+                </h5>
+            </div>
+        </div>
+
+        <div class="text-center gy-3">
+            <form>
+                <button type="button" class="btn btn-primary">
+                    <a href="./confirmation.html?nx=role" class="btn btn-primary">
+                        次へ進む
+                    </a>
+                </button>
+            </form>
+        </div>
+
+    </div>
+</body>
+
+
+<script>
+    let day = parseInt(sessionStorage.getItem('day') || "0", 10); // "0" を初期値として使用
+    document.getElementById("day").textContent = day;
+
+
+    // ページ読み込み時に実行
+    document.addEventListener("DOMContentLoaded", () => {
+        // セッションストレージからプレイヤーデータを取得
+        const playersData = sessionStorage.getItem("players");
+        console.log("Player status loaded:", playersData);
+
+        if (!playersData) {
+            console.error("No player data found in sessionStorage.");
+            return; // 処理を中断
+        }
+
+        const players = JSON.parse(playersData);
+
+        // 役職をシャッフル
+        const roles = ["市民１", "パン屋", "占い師", "騎士", "バカ", "狂人", "人狼", "市民２"];
+        const shuffledRoles = shuffle([...roles]); // 元の配列を破壊しないようコピー
+
+        // プレイヤーに役職を割り当てる
+        players.forEach((player, index) => {
+            if (index < shuffledRoles.length) {
+                player.yakushoku = shuffledRoles[index];
+            }
+        });
+
+        // 更新したプレイヤーデータをセッションストレージに再保存
+        sessionStorage.setItem("players", JSON.stringify(players));
+        console.log("Roles assigned and saved:", players);
+
+        // デバッグ: セッションストレージのデータを再取得して確認
+        const updatedPlayersData = sessionStorage.getItem("players");
+        console.log("Updated Players in sessionStorage:", JSON.parse(updatedPlayersData));
+    });
+
+    // 配列をシャッフルする関数
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+</script>

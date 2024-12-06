@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="./bootstrap-5.3.0-dist/css/bootstrap.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="container-sm">
+        <div class="row gy-3">
+            <figure class="text-center">
+                <blockquote class="blockquote">
+                    <h1>北辰寮　北人狼</h1>
+                </blockquote>
+                <figcaption class="blockquote-footer">
+                    寮則違反者はこの中にいる <cite title="Source Title">on 2024</cite>
+                </figcaption>
+            </figure>
+        </div>
+
+
+        <div class="row gx-3">
+            <h1>投票してください</h1>
+            <select class="form-select" id="voteSelect" aria-label="投票するプレイヤーを選択">
+                <option value="" selected>追放するプレイヤーの番号を選択してください</option>
+            </select>
+        </div>
+
+        <div class="text-center gy-3">
+            <button type="button" class="btn btn-primary" onclick="vote()">投票</button>
+        </div>
+
+    </div>
+
+</body>
+
+<script>
+
+    // セッションストレージからプレイヤーデータを取得
+    const playersRaw = sessionStorage.getItem("players");
+    const players = playersRaw ? JSON.parse(playersRaw) : null;
+
+    // プレイヤーデータが存在しない場合のエラー処理
+    if (!players || players.length === 0) {
+        console.error("プレイヤーデータが見つかりません");
+        throw new Error("プレイヤーデータがありません");
+    }
+
+    // ドロップダウンの要素を取得
+    const voteSelect = document.getElementById("voteSelect");
+
+    // 生存しているプレイヤーを選択肢として追加
+    players.forEach((player, index) => {
+        if (player.status === "alive") {
+            const option = document.createElement("option");
+            option.value = index + 1; // プレイヤー番号 (配列インデックス + 1)
+            option.textContent = `プレイヤー ${index + 1}`;
+            voteSelect.appendChild(option);
+        }
+    });
+    // 現在のプレイヤー番号を取得
+    const currentPlayer = parseInt(sessionStorage.getItem("currentPlayer") || "1", 10);
+
+    // 次のプレイヤー番号を設定
+    function nextPlayer() {
+
+        if (!playersData.length) {
+            alert("プレイヤーデータが見つかりません。初期化を確認してください。");
+            return;
+        }
+
+        const currentPlayer = parseInt(sessionStorage.getItem("currentPlayer") || "1");
+        const nextPlayer = currentPlayer + 1;
+
+
+
+        // 次のプレイヤー番号を保存
+        sessionStorage.setItem("currentPlayer", nextPlayer);
+        location.href = "./confirmation.html?nx=vote";
+    }
+
+    // 投票先の保存
+    function vote() {
+        const playersData = JSON.parse(sessionStorage.getItem("players") || "[]");
+        const targetPlayerNumber = document.getElementById("voteSelect").value; // セレクトボックスの選択値を取得
+
+        if (!targetPlayerNumber) {
+            alert("投票先を選択してください。");
+            return;
+        }
+
+        const votes = JSON.parse(sessionStorage.getItem("votes") || "{}");
+
+        // 現在のプレイヤーの投票を記録
+        votes[`player${currentPlayer}`] = targetPlayerNumber;
+
+        // 更新した投票データをセッションストレージに保存
+        sessionStorage.setItem("votes", JSON.stringify(votes));
+
+        // 次の画面に遷移
+        //alert(`プレイヤー${targetPlayerNumber}に投票しました！`);
+        const nextPlayer = currentPlayer + 1;
+
+        if (nextPlayer > playersData.length) {
+            alert("全プレイヤーの投票が行われました。");
+            sessionStorage.removeItem("currentPlayer"); // リセット
+            location.href = "./shokei.html";
+            return;
+        }
+
+        if (targetPlayerNumber) {
+            sessionStorage.setItem("currentPlayer", nextPlayer);
+            location.href = "./confirmation.html?nx=vote"; // 次のプレイヤーに移動
+        }
+    }
+
+</script>

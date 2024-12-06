@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="./bootstrap-5.3.0-dist/css/bootstrap.css" rel="stylesheet">
+
+    <script>
+        // 投票結果を集計し、追放されたプレイヤーを表示
+        function displayResults() {
+            const votes = JSON.parse(sessionStorage.getItem("votes")) || {};
+
+            // 投票結果を表示する要素
+            const resultsContainer = document.getElementById("results");
+
+            if (Object.keys(votes).length === 0) {
+                resultsContainer.innerHTML = "<p>まだ誰も投票していません。</p>";
+                return;
+            }
+
+            // 投票結果の一覧を表示
+            let resultsHTML = "<h2>投票結果:</h2><ul>";
+            let maxVotes = 0;
+            let eliminatedPlayer = null;
+
+            for (const [player, count] of Object.entries(votes)) {
+                resultsHTML += `<li>プレイヤー ${player}: ${count}票</li>`;
+                if (count > maxVotes) {
+                    maxVotes = count;
+                    eliminatedPlayer = player;
+                }
+            }
+            resultsHTML += "</ul>";
+
+            // 最多得票のプレイヤーを追放
+            resultsHTML += `<h2>追放されたのはプレイヤー ${eliminatedPlayer} です。</h2>`;
+            resultsContainer.innerHTML = resultsHTML;
+        }
+    </script>
+
+</head>
+
+
+<body>
+    <div class="Title">
+        <div class="container-sm">
+            <div class="row gy-3">
+                <figure class="text-center">
+                    <blockquote class="blockquote">
+                        <h1>北辰寮　北人狼</h1>
+                    </blockquote>
+                    <figcaption class="blockquote-footer">
+                        寮則違反者はこの中にいる <cite title="Source Title">on 2024</cite>
+                    </figcaption>
+                </figure>
+            </div>
+        </div>
+    </div>
+
+    <body onload="displayResults()">
+        <h1>投票結果</h1>
+        <div id="results">
+            <!-- 結果はここに表示される -->
+        </div>
+        <button onclick="location.href='./vote.html'">もう一度投票する</button>
+    </body>
+
+</body>

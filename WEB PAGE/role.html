@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="./bootstrap-5.3.0-dist/css/bootstrap.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="container-sm">
+        <div class="row gy-3">
+            <figure class="text-center">
+                <blockquote class="blockquote">
+                    <h1>北辰寮　北人狼</h1>
+                </blockquote>
+                <figcaption class="blockquote-footer">
+                    寮則違反者はこの中にいる <cite title="Source Title">on 2024</cite>
+                </figcaption>
+            </figure>
+        </div>
+
+
+        <div class="row gy-3">
+            <div class="text-center">
+                <p>あなたの役職は <span id="role"></span> です。</p>
+            </div>
+        </div>
+
+
+        <div class="text-center gy-3">
+            <button type="button" class="btn btn-primary" onclick="nextPlayer()">次へ進む</button>
+        </div>
+
+    </div>
+
+</body>
+
+<script>
+    // 現在のプレイヤー番号を取得
+    const currentPlayer = sessionStorage.getItem("currentPlayer")
+        ? parseInt(sessionStorage.getItem("currentPlayer"))
+        : 1;
+
+
+    // セッションストレージからプレイヤーデータを取得
+    const playersData = sessionStorage.getItem("players");
+    const players = playersData ? JSON.parse(playersData) : [];
+    if (!players[currentPlayer - 1]) {
+        console.error("プレイヤーデータが見つかりません。");
+        document.getElementById("role").textContent = "役職が設定されていません";
+    } else {
+        // 現在のプレイヤーの役職を表示
+        const role = players[currentPlayer - 1].yakushoku || "役職が設定されていません";
+        document.getElementById("role").textContent = role;
+    }
+
+    // 次のプレイヤー番号を設定
+    function nextPlayer() {
+        const nextPlayer = currentPlayer + 1;
+ 
+        //最後
+        if (nextPlayer > players.length) {
+            alert("全プレイヤーの行動が完了しました。");
+            sessionStorage.removeItem("currentPlayer"); // リセット
+            location.href = "./morning.html";
+            return;
+        }
+
+        // 次のプレイヤー番号をセッションストレージに保存
+        sessionStorage.setItem("currentPlayer", nextPlayer);
+
+        // 本人確認ページに戻る
+        location.href = "./confirmation.html?nx=role";
+    }
+</script>
