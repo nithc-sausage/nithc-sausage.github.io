@@ -29,6 +29,13 @@
             </div>
         </div>
 
+        <div id="content" class="text-center">
+            <h1>役職情報</h1>
+            <p id="roleMessage">役職によるメッセージがここに表示されます。</p>
+            <div id="actionArea"></div> <!-- 動的にドロップダウンを挿入 -->
+        </div>
+
+
 
         <div class="text-center gy-3">
             <button type="button" class="btn btn-primary" onclick="nextPlayer()">次へ進む</button>
@@ -38,31 +45,117 @@
 
 </body>
 
+
+
+
 <script>
     // 現在のプレイヤー番号を取得
-    const currentPlayer = sessionStorage.getItem("currentPlayer")
+    const currentPlayerNumber = sessionStorage.getItem("currentPlayer")
         ? parseInt(sessionStorage.getItem("currentPlayer"))
         : 1;
 
-
     // セッションストレージからプレイヤーデータを取得
-    const playersData = sessionStorage.getItem("players");
-    const players = playersData ? JSON.parse(playersData) : [];
-    if (!players[currentPlayer - 1]) {
+    const playerDataRaw = sessionStorage.getItem("players");
+    const playerList = playerDataRaw ? JSON.parse(playerDataRaw) : [];
+
+    // 現在のプレイヤー情報を取得
+    const currentPlayerData = playerList[currentPlayerNumber - 1];
+
+    if (!currentPlayerData) {
         console.error("プレイヤーデータが見つかりません。");
         document.getElementById("role").textContent = "役職が設定されていません";
     } else {
         // 現在のプレイヤーの役職を表示
-        const role = players[currentPlayer - 1].yakushoku || "役職が設定されていません";
-        document.getElementById("role").textContent = role;
+        const playerRole = currentPlayerData.yakushoku || "役職が設定されていません";
+        document.getElementById("role").textContent = playerRole;
+
+        // 役職に応じた処理
+        const roleMessageElement = document.getElementById("roleMessage");
+        const actionArea = document.getElementById("actionArea");
+
+        switch (playerRole) {
+            case "人狼":
+                roleMessageElement.textContent = "あなたは人狼です。市民を全滅させましょう！";
+
+                // ドロップダウンを追加
+                const wolfDropdown = document.createElement("select");
+                wolfDropdown.id = "targetSelect";
+                wolfDropdown.className = "form-select";
+
+                // 初期値を追加
+                const wolfDefaultOption = document.createElement("option");
+                wolfDefaultOption.textContent = "殺す対象を選んでください";
+                wolfDefaultOption.value = "";
+                wolfDropdown.appendChild(wolfDefaultOption);
+
+                // 生存プレイヤーの一覧を取得して追加
+                playerList.forEach(player => {
+                    if (player.status === "alive" && player.id !== currentPlayerData.id) {
+                        const wolfOption = document.createElement("option");
+                        wolfOption.textContent = `プレイヤー ${player.id}`;
+                        wolfOption.value = player.id;
+                        wolfDropdown.appendChild(wolfOption);
+                    }
+                });
+
+                // ドロップダウンをDOMに追加
+                actionArea.appendChild(wolfDropdown);
+
+                // 決定ボタンを追加
+                const wolfConfirmButton = document.createElement("button");
+                wolfConfirmButton.textContent = "決定";
+                wolfConfirmButton.className = "btn btn-danger mt-3";
+                wolfConfirmButton.onclick = () => {
+                    const targetId = wolfDropdown.value;
+                    if (!targetId) {
+                        alert("殺す対象を選んでください！");
+                    } else {
+                        alert(`プレイヤー ${targetId} を殺すことに決定しました。`);
+                        // 対象プレイヤーを殺害状態に変更
+                        const targetPlayer = playerList.find(p => p.id === parseInt(targetId, 10));
+                        if (targetPlayer) {
+                            targetPlayer.status = "dead";
+                            sessionStorage.setItem("players", JSON.stringify(playerList));
+                            console.log(`プレイヤー ${targetId} が殺されました。`);
+                        }
+                    }
+                };
+
+                actionArea.appendChild(wolfConfirmButton);
+                break;
+
+            case "占い師":
+                roleMessageElement.textContent = "あなたは占い師です。夜に誰かを占えます。";
+                break;
+
+            case "市民１":
+                roleMessageElement.textContent = "あなたは市民です。協力して人狼を見つけましょう！";
+                break;
+
+            case "市民２":
+                roleMessageElement.textContent = "あなたは市民です。協力して人狼を見つけましょう！";
+                break;
+
+            case "騎士":
+                roleMessageElement.textContent = "あなたは騎士です。一人を守ることができます。";
+                break;
+
+            case "バカ":
+                roleMessageElement.textContent = "あなたは騎士です。一人を守ることができます。";
+                break;
+
+            default:
+                roleMessageElement.textContent = "未定義";
+                break;
+        }
     }
 
     // 次のプレイヤー番号を設定
     function nextPlayer() {
-        const nextPlayer = currentPlayer + 1;
- 
-        //最後
-        if (nextPlayer > players.length) {
+        const nextPlayerIndex = currentPlayerNumber + 1;
+
+        // 全員の行動が完了した場合
+        if (nextPlayerIndex > playerList.length) {
             alert("全プレイヤーの行動が完了しました。");
             sessionStorage.removeItem("currentPlayer"); // リセット
             location.href = "./morning.html";
@@ -70,9 +163,9 @@
         }
 
         // 次のプレイヤー番号をセッションストレージに保存
-        sessionStorage.setItem("currentPlayer", nextPlayer);
+        sessionStorage.setItem("currentPlayer", nextPlayerIndex);
 
-        // 本人確認ページに戻る
+        // 本人確認ページに遷移
         location.href = "./confirmation.html?nx=role";
     }
 </script>

@@ -108,11 +108,17 @@ function proceedToNextPage(event) {
         // 人狼側の勝利時には index.html に遷移
         window.location.href = "index.html";
     }
-    // ゲーム続行中
-    else {
+    // ゲーム続行中 (day1)
+    else if(day==1){
         messageElement.textContent = "ゲーム続行中";
         // ゲーム続行中は "./confirmation.html?nx=speech10" に遷移
         window.location.href = "./confirmation.html?nx=speech10";
+    }
+    // ゲーム続行中
+    else{
+        messageElement.textContent = "ゲーム続行中";
+        // ゲーム続行中は "./discuss.html" に遷移
+        window.location.href = "./discuss.html";
     }
 }
 </script>
