@@ -45,80 +45,107 @@
     </div>
 </body>
 
+
+
+
+
 <script>
-// プレイヤーデータを取得
-const playersRaw = sessionStorage.getItem("players");
-const players = playersRaw ? JSON.parse(playersRaw) : null;
+    // プレイヤーデータを取得
+    const playersRaw = sessionStorage.getItem("players");
+    const players = playersRaw ? JSON.parse(playersRaw) : null;
 
-// プレイヤーデータが存在しない場合のエラー処理
-if (!players || players.length === 0) {
-    console.error("プレイヤーデータがありません");
-    throw new Error("Invalid player data");
-}
+    // プレイヤーデータが存在しない場合のエラー処理
+    if (!players || players.length === 0) {
+        console.error("プレイヤーデータがありません");
+        throw new Error("Invalid player data");
+    }
 
-// 生存している市民と人狼の人数をカウント
-let citizenCount = 0;
-let werewolfCount = 0;
+    // 生存している市民と人狼の人数をカウント
+    let citizenCount = 0;
+    let werewolfCount = 0;
 
-players.forEach(player => {
-    if (player.status === "alive") {
-        if (player.yakushoku === "人狼") {
-            werewolfCount++;
-            console.log(1);
+    players.forEach(player => {
+        if (player.status === "alive") {
+            if (player.yakushoku === "人狼") {
+                werewolfCount++;
+                console.log(1);
+            } else {
+                citizenCount++;
+                console.log(0);
+            }
+        }
+    });
+
+    // 勝利条件を判定
+    const messageElement = document.getElementById("message");
+    const nextButton = document.getElementById("nextButton");
+    let deadPlayer = sessionStorage.getItem("dead");
+
+    // データ型を変換
+    deadPlayer = deadPlayer ? parseInt(deadPlayer, 10) : null;
+
+    // 処刑されたプレイヤーがいる場合
+    if (deadPlayer) {
+        messageElement.textContent = `${deadPlayer}番のプレイヤーが殺されました。`;
+
+        // セッションストレージからプレイヤーデータを取得
+        const playersData = JSON.parse(sessionStorage.getItem("players") || "[]");
+
+        // 処刑者のステータスを更新
+        const playerToUpdate = playersData.find(player => player.id === deadPlayer);
+        if (playerToUpdate) {
+            playerToUpdate.status = "dead";
+            sessionStorage.setItem("players", JSON.stringify(playersData)); // データを再保存
+            alert(`プレイヤー${deadPlayer}が殺されました！`);
         } else {
-            citizenCount++;
-            console.log(0);
+            alert(`プレイヤー${deadPlayer}が見つかりませんでした。`);
+        }
+    } else {
+        messageElement.textContent = "盗食による退寮者が発生した。";
+    }
+
+    // 投票データを取得（デバッグ用）
+    const votes = JSON.parse(sessionStorage.getItem("votes") || "{}");
+    console.log(votes);
+
+
+    // 日付更新
+    let day = parseInt(sessionStorage.getItem('day') || "0", 10); // "0" を初期値として使用
+    day += 1;
+    sessionStorage.setItem('day', day);
+    document.getElementById("day").textContent = day;
+    console.log(day);
+
+    function proceedToNextPage(event) {
+        event.preventDefault(); // ボタンのデフォルト動作をキャンセル
+
+        // ボタンのクリックイベントが複数回発生しないように disable する
+        nextButton.disabled = true;
+
+        // 市民側の勝利
+        if (werewolfCount === 0) {
+            messageElement.textContent = "市民側の勝利";
+            // 市民側の勝利時には index.html に遷移
+            window.location.href = "index.html";
+        }
+        // 人狼側の勝利
+        else if (citizenCount <= werewolfCount) {
+            messageElement.textContent = "人狼側の勝利";
+            // 人狼側の勝利時には index.html に遷移
+            window.location.href = "index.html";
+        }
+        // ゲーム続行中 (day1)
+        else if (day == 1) {
+            messageElement.textContent = "ゲーム続行中";
+            // ゲーム続行中は "./confirmation.html?nx=speech10" に遷移
+            window.location.href = "./confirmation.html?nx=speech10";
+        }
+        // ゲーム続行中
+        else {
+            messageElement.textContent = "ゲーム続行中";
+            // ゲーム続行中は "./discuss.html" に遷移
+            window.location.href = "./discuss.html";
         }
     }
-});
 
-// 勝利条件を判定
-const messageElement = document.getElementById("message");
-const nextButton = document.getElementById("nextButton");
-let deadPlayer = sessionStorage.getItem("dead");
-if (deadPlayer != 0) {
-    document.getElementById("message").textContent = deadPlayer + "番のプレイヤーが殺されました。";
-} else {
-    document.getElementById("message").textContent = "盗食による退寮者が発生した。";
-}
-const votes = JSON.parse(sessionStorage.getItem("votes") || "{}");
-console.log(votes);
-
-// 日付更新
-let day = parseInt(sessionStorage.getItem('day') || "0", 10); // "0" を初期値として使用
-day += 1;
-sessionStorage.setItem('day', day);
-document.getElementById("day").textContent = day;
-
-function proceedToNextPage(event) {
-    event.preventDefault(); // ボタンのデフォルト動作をキャンセル
-
-    // ボタンのクリックイベントが複数回発生しないように disable する
-    nextButton.disabled = true;
-
-    // 市民側の勝利
-    if (werewolfCount === 0) {
-        messageElement.textContent = "市民側の勝利";
-        // 市民側の勝利時には index.html に遷移
-        window.location.href = "index.html";
-    }
-    // 人狼側の勝利
-    else if (citizenCount <= werewolfCount) {
-        messageElement.textContent = "人狼側の勝利";
-        // 人狼側の勝利時には index.html に遷移
-        window.location.href = "index.html";
-    }
-    // ゲーム続行中 (day1)
-    else if(day==1){
-        messageElement.textContent = "ゲーム続行中";
-        // ゲーム続行中は "./confirmation.html?nx=speech10" に遷移
-        window.location.href = "./confirmation.html?nx=speech10";
-    }
-    // ゲーム続行中
-    else{
-        messageElement.textContent = "ゲーム続行中";
-        // ゲーム続行中は "./discuss.html" に遷移
-        window.location.href = "./discuss.html";
-    }
-}
 </script>

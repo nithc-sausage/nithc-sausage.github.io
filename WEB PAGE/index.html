@@ -48,7 +48,7 @@
     sessionStorage.setItem("day", 0);
     sessionStorage.setItem("dead", 0);
     sessionStorage.setItem("game", 0);
-    sessionStorage.setItem("currentPlayer",1);
+    sessionStorage.setItem("currentPlayer", 1);
     sessionStorage.removeItem("votes");
 
     // プレイヤーデータをセッションストレージに保存
@@ -61,9 +61,49 @@
           status: "alive" // 生存状態
         });
       }
+
       sessionStorage.setItem("players", JSON.stringify(players));
       console.log("Players saved:", players);
+
+      // セッションストレージからプレイヤーデータを取得
+      const playersData = sessionStorage.getItem("players");
+      console.log("Player status loaded:", playersData);
+
+      if (!playersData) {
+        console.error("No player data found in sessionStorage.");
+        return; // 処理を中断
+      }
+
+      // 役職をシャッフル
+      const roles = ["市民１", "パン屋", "占い師", "騎士", "バカ", "狂人", "人狼", "市民２"];
+      const shuffledRoles = shuffle([...roles]); // 元の配列を破壊しないようコピー
+
+      // プレイヤーに役職を割り当てる
+      players.forEach((player, index) => {
+        if (index < shuffledRoles.length) {
+          player.yakushoku = shuffledRoles[index];
+        }
+      });
+
+      // 更新したプレイヤーデータをセッションストレージに再保存
+      sessionStorage.setItem("players", JSON.stringify(players));
+      console.log("Roles assigned and saved:", players);
+
+      // デバッグ: セッションストレージのデータを再取得して確認
+      const updatedPlayersData = sessionStorage.getItem("players");
+      console.log("Updated Players in sessionStorage:", JSON.parse(updatedPlayersData));
+    };
+
+    // 配列をシャッフルする関数
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
     }
+
+
 
     // ゲーム開始
     function startGame() {

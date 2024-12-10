@@ -35,12 +35,6 @@
             <div id="actionArea"></div> <!-- 動的にドロップダウンを挿入 -->
         </div>
 
-
-
-        <div class="text-center gy-3">
-            <button type="button" class="btn btn-primary" onclick="nextPlayer()">次へ進む</button>
-        </div>
-
     </div>
 
 </body>
@@ -72,6 +66,7 @@
         // 役職に応じた処理
         const roleMessageElement = document.getElementById("roleMessage");
         const actionArea = document.getElementById("actionArea");
+        const ConfirmButton = document.createElement("button");
 
         switch (playerRole) {
             case "人狼":
@@ -114,9 +109,15 @@
                         // 対象プレイヤーを殺害状態に変更
                         const targetPlayer = playerList.find(p => p.id === parseInt(targetId, 10));
                         if (targetPlayer) {
+                            sessionStorage.setItem("dead", targetId);
+
+
+                            /*
                             targetPlayer.status = "dead";
                             sessionStorage.setItem("players", JSON.stringify(playerList));
                             console.log(`プレイヤー ${targetId} が殺されました。`);
+                            */
+                            nextPlayer();
                         }
                     }
                 };
@@ -126,26 +127,152 @@
 
             case "占い師":
                 roleMessageElement.textContent = "あなたは占い師です。夜に誰かを占えます。";
+                // ドロップダウンを追加
+                const divinerDropdown = document.createElement("select");
+                divinerDropdown.id = "targetSelect";
+                divinerDropdown.className = "form-select";
+
+                // 初期値を追加
+                const divinerDefaultOption = document.createElement("option");
+                divinerDefaultOption.textContent = "占う対象を選んでください";
+                divinerDefaultOption.value = "";
+                divinerDropdown.appendChild(divinerDefaultOption);
+
+                // 生存プレイヤーの一覧を取得して追加
+                playerList.forEach(player => {
+                    if (player.status === "alive" && player.id !== currentPlayerData.id) {
+                        const divinerOption = document.createElement("option");
+                        divinerOption.textContent = `プレイヤー ${player.id}`;
+                        divinerOption.value = player.id;
+                        divinerDropdown.appendChild(divinerOption);
+                    }
+                });
+
+                // ドロップダウンをDOMに追加
+                actionArea.appendChild(divinerDropdown);
+
+                // 決定ボタンを追加
+                const divinerConfirmButton = document.createElement("button");
+                divinerConfirmButton.textContent = "決定";
+                divinerConfirmButton.className = "btn btn-danger mt-3";
+
+                divinerConfirmButton.onclick = () => {
+                    const targetId = divinerDropdown.value; // 選択された値
+                    if (!targetId) {
+                        alert("占う対象を選んでください！");
+                        return;
+                    }
+
+                    // 対象プレイヤーを取得（IDベースで検索）
+                    const targetPlayerData = playerList.find(player => player.id === parseInt(targetId, 10));
+                    if (!targetPlayerData) {
+                        alert("対象プレイヤーが見つかりません！");
+                        return;
+                    }
+
+                    // 対象プレイヤーの役職を取得
+                    const role = targetPlayerData.yakushoku;
+
+                    // 結果を表示
+                    alert(`プレイヤー ${targetId} は、${role} です。`);
+                    nextPlayer();
+                };
+
+                // ボタンをDOMに追加
+                actionArea.appendChild(divinerConfirmButton);
+
                 break;
 
             case "市民１":
                 roleMessageElement.textContent = "あなたは市民です。協力して人狼を見つけましょう！";
+                // 決定ボタンを追加
+                ConfirmButton.textContent = "次へ進む";
+                ConfirmButton.className = "btn btn-danger mt-3";
+                ConfirmButton.onclick = () => {
+                    nextPlayer();
+                }
+                // ボタンをDOMに追加
+                actionArea.appendChild(ConfirmButton);
                 break;
 
             case "市民２":
                 roleMessageElement.textContent = "あなたは市民です。協力して人狼を見つけましょう！";
+                // 決定ボタンを追加
+                ConfirmButton.textContent = "次へ進む";
+                ConfirmButton.className = "btn btn-danger mt-3";
+                ConfirmButton.onclick = () => {
+                    nextPlayer();
+                }
+                // ボタンをDOMに追加
+                actionArea.appendChild(ConfirmButton);
                 break;
 
             case "騎士":
                 roleMessageElement.textContent = "あなたは騎士です。一人を守ることができます。";
+                // 決定ボタンを追加
+                ConfirmButton.textContent = "次へ進む";
+                ConfirmButton.className = "btn btn-danger mt-3";
+                ConfirmButton.onclick = () => {
+                    nextPlayer();
+                }
+                // ボタンをDOMに追加
+                actionArea.appendChild(ConfirmButton);
                 break;
 
             case "バカ":
-                roleMessageElement.textContent = "あなたは騎士です。一人を守ることができます。";
+                roleMessageElement.textContent = "あなたは占い師です。一人を守ることができます。";
+                // 決定ボタンを追加
+                ConfirmButton.textContent = "次へ進む";
+                ConfirmButton.className = "btn btn-danger mt-3";
+                ConfirmButton.onclick = () => {
+                    nextPlayer();
+                }
+                // ボタンをDOMに追加
+                actionArea.appendChild(ConfirmButton);
                 break;
+
+            case "狂人":
+                roleMessageElement.textContent = "あなたは狂人です。人狼の手助けをしよう。";
+
+                // セッションストレージからプレイヤーデータを取得
+                const playersData = JSON.parse(sessionStorage.getItem("players") || "[]");
+
+                // 人狼プレイヤーのIDを取得
+                const wolfPlayers = playersData
+                    .filter(player => player.yakushoku === "人狼") // 役職が「人狼」のプレイヤーを探す
+                    .map(player => player.id); // IDだけを取得
+
+                if (wolfPlayers.length > 0) {
+                    // 配列を文字列として表示するために join を使用
+                    alert(`プレイヤー ${wolfPlayers.join(", ")} が人狼です。`);
+                } else {
+                    alert("人狼が見つかりませんでした。");
+                }
+
+                // 決定ボタンを作成
+                const confirmButton = document.createElement("button"); // ConfirmButtonではなくconfirmButtonに統一
+                confirmButton.textContent = "次へ進む";
+                confirmButton.className = "btn btn-danger mt-3";
+                confirmButton.onclick = () => {
+                    nextPlayer(); // 次のプレイヤーに進む
+                };
+
+                // ボタンをDOMに追加
+                actionArea.appendChild(confirmButton);
+                break;
+
+
 
             default:
                 roleMessageElement.textContent = "未定義";
+                // 決定ボタンを追加
+                ConfirmButton.textContent = "次へ進む";
+                ConfirmButton.className = "btn btn-danger mt-3";
+                ConfirmButton.onclick = () => {
+                    nextPlayer();
+                }
+                // ボタンをDOMに追加
+                actionArea.appendChild(ConfirmButton);
                 break;
         }
     }

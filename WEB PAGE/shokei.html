@@ -54,13 +54,9 @@
 </body>
 
 <script>
-    
+
     const votes = JSON.parse(sessionStorage.getItem("votes") || "{}");
     console.log(votes);
-
-    // 日付更新
-    let day = parseInt(sessionStorage.getItem('day') || "0", 10); // "0" を初期値として使用
-    document.getElementById("day").textContent = day;
 
     // 投票数を集計
     const voteCounts = Object.values(votes).reduce((counts, vote) => {
@@ -105,7 +101,7 @@
         sessionStorage.removeItem("votes");
 
         // 次のページに遷移
-        window.location.href = "./yakushoku.html";
+        window.location.href = "./confirmation.html?nx=role";
     }
 
     // プレイヤーデータを取得
@@ -136,37 +132,42 @@
     const messageElement = document.getElementById("message");
     if (werewolfCount === 0) {
         messageElement.textContent = "市民側の勝利";
-        sessionStorage.setItem("game",1);
+        sessionStorage.setItem("game", 1);
     } else if (citizenCount <= werewolfCount) {
         messageElement.textContent = "人狼側の勝利";
-        sessionStorage.setItem("game",1);
+        sessionStorage.setItem("game", 1);
     } else {
         messageElement.textContent = "ゲーム続行中";
     }
 
     function proceedToNextPage(event) {
-    event.preventDefault(); // ボタンのデフォルト動作をキャンセル
+        // 日付更新
+        let day = parseInt(sessionStorage.getItem('day') || "0", 10); // "0" を初期値として使用
+        document.getElementById("day").textContent = day;
+        console.log(day);
 
-    // ボタンのクリックイベントが複数回発生しないように disable する
-    nextButton.disabled = true;
+        event.preventDefault(); // ボタンのデフォルト動作をキャンセル
 
-    // 市民側の勝利
-    if (werewolfCount === 0) {
-        messageElement.textContent = "市民側の勝利";
-        // 市民側の勝利時には index.html に遷移
-        window.location.href = "index.html";
+        // ボタンのクリックイベントが複数回発生しないように disable する
+        nextButton.disabled = true;
+
+        // 市民側の勝利
+        if (werewolfCount === 0) {
+            messageElement.textContent = "市民側の勝利";
+            // 市民側の勝利時には index.html に遷移
+            window.location.href = "index.html";
+        }
+        // 人狼側の勝利
+        else if (citizenCount <= werewolfCount) {
+            messageElement.textContent = "人狼側の勝利";
+            // 人狼側の勝利時には index.html に遷移
+            window.location.href = "index.html";
+        }
+        // ゲーム続行中
+        else {
+            messageElement.textContent = "ゲーム続行中";
+            // ゲーム続行中は "./confirmation.html?nx=speech10" に遷移
+            window.location.href = "./yakushoku.html";
+        }
     }
-    // 人狼側の勝利
-    else if (citizenCount <= werewolfCount) {
-        messageElement.textContent = "人狼側の勝利";
-        // 人狼側の勝利時には index.html に遷移
-        window.location.href = "index.html";
-    }
-    // ゲーム続行中
-    else {
-        messageElement.textContent = "ゲーム続行中";
-        // ゲーム続行中は "./confirmation.html?nx=speech10" に遷移
-        window.location.href = "./confirmation.html?nx=speech10";
-    }
-}
 </script>
