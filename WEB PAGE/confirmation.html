@@ -60,9 +60,6 @@
     // currentPlayer をセッションから取得、デフォルトは 1
     let currentPlayer = parseInt(sessionStorage.getItem("currentPlayer")) || 1;
 
-    // 現在のプレイヤーをセッションストレージに保存
-    sessionStorage.setItem("currentPlayer", currentPlayer);
-
     // 現在のプレイヤーを表示
     console.log(`Current Player: ${currentPlayer}, Status: ${players[currentPlayer - 1]?.status}`);
     document.getElementById("playerNumber").textContent = currentPlayer;

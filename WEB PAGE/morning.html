@@ -29,6 +29,7 @@
                     <div class="text-center">
                         <div>
                             <p><span id="message"></span></p>
+                            <p><span id="panya"></span></p>
                         </div>
                     </div>
                 </h5>
@@ -60,6 +61,8 @@
     // プレイヤーデータを取得
     const playersRaw = sessionStorage.getItem("players");
     const players = playersRaw ? JSON.parse(playersRaw) : null;
+
+
 
     // プレイヤーデータが存在しない場合のエラー処理
     if (!players || players.length === 0) {
@@ -118,6 +121,30 @@
     // 投票データを取得（デバッグ用）
     const votes = JSON.parse(sessionStorage.getItem("votes") || "{}");
     console.log(votes);
+
+
+    // セッションストレージからプレイヤーデータを取得
+    const playersData = JSON.parse(sessionStorage.getItem("players") || "[]");
+
+    // 役職が「パン屋」のプレイヤーを検索
+    const bakerPlayer = playersData.find(player => player.yakushoku === "パン屋");
+
+    // パン屋の生存状態をチェックして表示
+    const panyaElement = document.getElementById("panya");
+    if (bakerPlayer) {
+        if (bakerPlayer.status === "alive") {
+            panyaElement.textContent = "シダックスの朝飯です。";
+            console.log("パン屋は生きています。");
+        } else if (bakerPlayer.status === "dead") {
+            panyaElement.textContent = "今日の朝食はありません。";
+            console.log("パン屋は死んでいます。");
+        } else {
+            console.log("パン屋のステータスが不明です。");
+        }
+    } else {
+        console.log("役職が「パン屋」のプレイヤーが見つかりませんでした。");
+    }
+
 
 
 

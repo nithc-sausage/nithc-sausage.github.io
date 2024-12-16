@@ -74,6 +74,7 @@
             const nextPlayer = playerList[nextPlayerIndex - 1]; // 配列インデックス調整
             if (nextPlayer?.status === "alive") {
                 break; // 生存プレイヤーを見つけた場合ループを終了
+                console.log(nextPlayerIndex);
             }
             nextPlayerIndex++;
         }
