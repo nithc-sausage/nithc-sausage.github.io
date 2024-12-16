@@ -67,20 +67,30 @@
 
     // 次のプレイヤー番号を設定
     function nextPlayer() {
+        let nextPlayerIndex = currentPlayerNumber + 1;
 
-        if (!playersData.length) {
-            alert("プレイヤーデータが見つかりません。初期化を確認してください。");
+        // 生存している次のプレイヤーを探す
+        while (nextPlayerIndex <= playerList.length) {
+            const nextPlayer = playerList[nextPlayerIndex - 1]; // 配列インデックス調整
+            if (nextPlayer?.status === "alive") {
+                break; // 生存プレイヤーを見つけた場合ループを終了
+            }
+            nextPlayerIndex++;
+        }
+
+        // 全員の行動が完了した場合
+        if (nextPlayerIndex > playerList.length) {
+            alert("全プレイヤーの行動が完了しました。");
+            sessionStorage.removeItem("currentPlayer"); // リセット
+            location.href = "./morning.html";
             return;
         }
 
-        const currentPlayer = parseInt(sessionStorage.getItem("currentPlayer") || "1");
-        const nextPlayer = currentPlayer + 1;
+        // 次のプレイヤー番号をセッションストレージに保存
+        sessionStorage.setItem("currentPlayer", nextPlayerIndex);
 
-
-
-        // 次のプレイヤー番号を保存
-        sessionStorage.setItem("currentPlayer", nextPlayer);
-        location.href = "./confirmation.html?nx=vote";
+        // 本人確認ページに遷移
+        location.href = "./confirmation.html?nx=role";
     }
 
     // 投票先の保存

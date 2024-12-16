@@ -54,6 +54,8 @@
 </body>
 
 <script>
+    let day = parseInt(sessionStorage.getItem('day') || "0", 10); // "0" を初期値として使用
+    document.getElementById("day").textContent = day;
 
     const votes = JSON.parse(sessionStorage.getItem("votes") || "{}");
     console.log(votes);

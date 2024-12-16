@@ -35,90 +35,72 @@
         </div>
     </div>
 
-    <script>
-        // プレイヤーステータスを取得
-        const playersRaw = sessionStorage.getItem("players");
-        console.log("Player status loaded:", playersRaw);
 
-        // プレイヤーデータを JSON に変換
-        const players = playersRaw ? JSON.parse(playersRaw) : null;
-
-        // プレイヤーデータが存在しない場合のエラー処理
-        if (!players || players.length === 0) {
-            displayError("プレイヤーデータが見つかりません。ゲームをリセットしてください。");
-            throw new Error("プレイヤーデータが見つかりません");
-        }
-
-        // URLSearchParams を使用してクエリパラメータを取得
-        const params = new URLSearchParams(window.location.search);
-        const nextPage = params.get("nx");
-        console.log("Next page parameter:", nextPage);
-
-        // currentPlayer をセッションから取得、デフォルトは 1
-        let currentPlayer = parseInt(sessionStorage.getItem("currentPlayer")) || 1;
-
-        // 現在のプレイヤーのステータスを確認
-        let status = players[currentPlayer - 1]?.status;
-
-        // 無効なプレイヤー番号のエラーチェック
-        if (status === undefined) {
-            displayError("無効なプレイヤー番号です。");
-            throw new Error("Invalid player number");
-        }
-
-        // 状態が "dead" の場合は次のプレイヤーを探す
-        while (status === "dead") {
-            currentPlayer += 1;
-
-            // 配列外参照を防ぐ
-            if (currentPlayer > players.length) {
-                displayError("全プレイヤーが死亡しています。");
-                throw new Error("No players alive");
-            }
-
-            // 次のプレイヤーのステータスを取得
-            status = players[currentPlayer - 1]?.status;
-        }
-        sessionStorage.setItem("currentPlayer", currentPlayer);//セッションストレージの更新
-
-        // 現在のプレイヤーを表示
-        console.log(`Current Player: ${currentPlayer}, Status: ${status}`);
-        document.getElementById("playerNumber").textContent = currentPlayer;
-
-        // 日付取得
-        let day = parseInt(sessionStorage.getItem('day') || "0", 10); // "0" を初期値として使用    
-
-        // 次へ進むボタンの処理
-        function proceedToNextPage() {
-            const game = sessionStorage.getItem("game");
-            if (game == 0) {
-                if (nextPage === "role") {
-                    location.href = "./role.html";
-                } else if (nextPage === "morning") {
-                    location.href = "./morning.html";
-                } else if (nextPage === "speech") {
-                    location.href = "./speech.html";
-                } else if (nextPage === "speech10") {
-                    location.href = "./speech10.html";
-                } else if (nextPage === "vote") {
-                    location.href = "./vote.html";
-                } else if (nextPage === "index") {
-                    location.href = "./index.html";
-                } else {
-                    displayError("無効な遷移先が指定されています。");
-                    console.error("Invalid next page");
-                }
-            }
-            else{
-                location.href = "./index.html";
-            }
-        }
-
-        // エラーメッセージを表示
-        function displayError(message) {
-            const errorMessage = document.getElementById("errorMessage");
-            errorMessage.textContent = message;
-            errorMessage.style.display = "block";
-        }
-    </script>
 </body>
+<script>
+
+    // プレイヤーステータスを取得
+    const playersRaw = sessionStorage.getItem("players");
+    console.log("Player status loaded:", playersRaw);
+
+    // プレイヤーデータを JSON に変換
+    const players = playersRaw ? JSON.parse(playersRaw) : null;
+
+    // プレイヤーデータが存在しない場合のエラー処理
+    if (!players || players.length === 0) {
+        displayError("プレイヤーデータが見つかりません。ゲームをリセットしてください。");
+        throw new Error("プレイヤーデータが見つかりません");
+    }
+
+    // URLSearchParams を使用してクエリパラメータを取得
+    const params = new URLSearchParams(window.location.search);
+    const nextPage = params.get("nx");
+    console.log("Next page parameter:", nextPage);
+
+    // currentPlayer をセッションから取得、デフォルトは 1
+    let currentPlayer = parseInt(sessionStorage.getItem("currentPlayer")) || 1;
+
+    // 現在のプレイヤーをセッションストレージに保存
+    sessionStorage.setItem("currentPlayer", currentPlayer);
+
+    // 現在のプレイヤーを表示
+    console.log(`Current Player: ${currentPlayer}, Status: ${players[currentPlayer - 1]?.status}`);
+    document.getElementById("playerNumber").textContent = currentPlayer;
+
+    // 日付取得
+    let day = parseInt(sessionStorage.getItem("day") || "0", 10); // "0" を初期値として使用    
+
+    // 次へ進むボタンの処理
+    function proceedToNextPage() {
+        const game = sessionStorage.getItem("game");
+        if (game == 0) {
+            if (nextPage === "role") {
+                location.href = "./role.html";
+            } else if (nextPage === "morning") {
+                location.href = "./morning.html";
+            } else if (nextPage === "speech") {
+                location.href = "./speech.html";
+            } else if (nextPage === "speech10") {
+                location.href = "./speech10.html";
+            } else if (nextPage === "vote") {
+                location.href = "./vote.html";
+            } else if (nextPage === "index") {
+                location.href = "./index.html";
+            } else {
+                displayError("無効な遷移先が指定されています。");
+                console.error("Invalid next page");
+            }
+        } else {
+            location.href = "./index.html";
+        }
+    }
+
+    // エラーメッセージを表示
+    function displayError(message) {
+        const errorMessage = document.getElementById("errorMessage");
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+    }
+</script>
+
+</html>

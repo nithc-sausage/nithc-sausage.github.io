@@ -50,6 +50,13 @@
 
 
 <script>
+    // 日付更新
+    let day = parseInt(sessionStorage.getItem('day') || "0", 10); // "0" を初期値として使用
+    day += 1;
+    sessionStorage.setItem('day', day);
+    document.getElementById("day").textContent = day;
+    console.log(day);
+
     // プレイヤーデータを取得
     const playersRaw = sessionStorage.getItem("players");
     const players = playersRaw ? JSON.parse(playersRaw) : null;
@@ -80,12 +87,14 @@
     const messageElement = document.getElementById("message");
     const nextButton = document.getElementById("nextButton");
     let deadPlayer = sessionStorage.getItem("dead");
+    let kisi = sessionStorage.getItem("kisi");
 
     // データ型を変換
     deadPlayer = deadPlayer ? parseInt(deadPlayer, 10) : null;
+    kisi = kisi ? parseInt(kisi, 10) : null;
 
-    // 処刑されたプレイヤーがいる場合
-    if (deadPlayer) {
+    // 殺害されたプレイヤーがいる場合
+    if (deadPlayer != kisi) {
         messageElement.textContent = `${deadPlayer}番のプレイヤーが殺されました。`;
 
         // セッションストレージからプレイヤーデータを取得
@@ -100,8 +109,10 @@
         } else {
             alert(`プレイヤー${deadPlayer}が見つかりませんでした。`);
         }
-    } else {
+    } else if (day == "1") {
         messageElement.textContent = "盗食による退寮者が発生した。";
+    } else {
+        messageElement.textContent = "誰も退寮しなかった。";
     }
 
     // 投票データを取得（デバッグ用）
@@ -109,12 +120,7 @@
     console.log(votes);
 
 
-    // 日付更新
-    let day = parseInt(sessionStorage.getItem('day') || "0", 10); // "0" を初期値として使用
-    day += 1;
-    sessionStorage.setItem('day', day);
-    document.getElementById("day").textContent = day;
-    console.log(day);
+
 
     function proceedToNextPage(event) {
         event.preventDefault(); // ボタンのデフォルト動作をキャンセル

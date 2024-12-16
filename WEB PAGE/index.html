@@ -46,10 +46,12 @@
   <script>
     // 初期化
     sessionStorage.setItem("day", 0);
+    sessionStorage.setItem("kisi",0);
     sessionStorage.setItem("dead", 0);
     sessionStorage.setItem("game", 0);
     sessionStorage.setItem("currentPlayer", 1);
     sessionStorage.removeItem("votes");
+
 
     // プレイヤーデータをセッションストレージに保存
     function setPlayerStates(playersCount) {
@@ -92,6 +94,23 @@
       // デバッグ: セッションストレージのデータを再取得して確認
       const updatedPlayersData = sessionStorage.getItem("players");
       console.log("Updated Players in sessionStorage:", JSON.parse(updatedPlayersData));
+
+      //バカのための関数
+      // 役職が存在する場合にランダムで1つ選択（ただし "バカ" は除外）
+      if (roles.length > 0) {
+        let randomRole;
+        do {
+          const randomIndex = Math.floor(Math.random() * roles.length);
+          randomRole = roles[randomIndex];
+        } while (randomRole === "バカ"); // 抽選結果が "バカ" の場合、再抽選
+
+        console.log(`バカ視点人狼: ${randomRole}`);
+        sessionStorage.setItem("baka_jinro",randomRole);
+      } else {
+        console.log("役職が見つかりませんでした。");
+        alert("役職が見つかりませんでした。");
+      }
+
     };
 
     // 配列をシャッフルする関数
@@ -102,6 +121,8 @@
       }
       return array;
     }
+
+
 
 
 
