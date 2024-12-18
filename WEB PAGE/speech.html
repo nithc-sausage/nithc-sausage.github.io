@@ -38,30 +38,71 @@
 </body>
 
 <script>
-    // 現在のプレイヤー番号を取得または初期化
-    const currentPlayer = sessionStorage.getItem("currentPlayer")
+    // セッションストレージからプレイヤーデータを取得
+    const playersRaw = sessionStorage.getItem("players");
+    const players = playersRaw ? JSON.parse(playersRaw) : null;
+
+    // プレイヤーデータが存在しない場合のエラー処理
+    if (!players || players.length === 0) {
+        console.error("プレイヤーデータが見つかりません");
+        throw new Error("プレイヤーデータがありません");
+    }
+
+    // 現在のプレイヤー番号を取得
+    let currentPlayerNumber = sessionStorage.getItem("currentPlayer")
         ? parseInt(sessionStorage.getItem("currentPlayer"))
         : 1;
 
+    // 1番が死亡している場合、生きている最も若い番号のプレイヤーを探す
+    if (players[currentPlayerNumber - 1]?.status !== "alive") {
+        for (let i = 0; i < players.length; i++) {
+            if (players[i].status === "alive") {
+                currentPlayerNumber = i + 1; // プレイヤー番号は配列インデックス+1
+                break;
+            }
+        }
+    }
+
+    // 現在のプレイヤー番号をセッションストレージに保存
+    sessionStorage.setItem("currentPlayer", currentPlayerNumber);
+
+    console.log(`現在のプレイヤー番号: ${currentPlayerNumber}`);
+        
+    // プレイヤーリストの取得
+    const playerListRaw = sessionStorage.getItem("players");
+    const playerList = playerListRaw ? JSON.parse(playerListRaw) : [];
+    if (playerList.length === 0) {
+        console.error("プレイヤーリストが見つかりません。");
+        alert("エラー: プレイヤーデータが読み込まれていません。");
+    }
+
     // 次のプレイヤー番号を設定
     function nextPlayer() {
-        let currentPlayer = sessionStorage.getItem("currentPlayer")
-            ? parseInt(sessionStorage.getItem("currentPlayer"))
-            : 1;
+        let nextPlayerIndex = currentPlayerNumber + 1;
 
-        const nextPlayer = currentPlayer + 1;
+        // 生存している次のプレイヤーを探す
+        while (nextPlayerIndex <= playerList.length) {
+            const nextPlayer = playerList[nextPlayerIndex - 1]; // 配列インデックス調整
+            if (nextPlayer?.status === "alive") {
+                console.log(`次のプレイヤー番号は ${nextPlayerIndex} です。`);
+                break; // 生存プレイヤーを見つけた場合ループを終了
+            }
+            nextPlayerIndex++;
+        }
 
-        if (nextPlayer > 8) {
-            // すべてのプレイヤーのスピーチが終わったら投票画面に遷移
-            sessionStorage.removeItem("currentPlayer"); // プレイヤー番号をリセット
-            location.href = "./confirmation.html?nx=vote"; // 投票画面に遷移
+        // 全員の行動が完了した場合
+        if (nextPlayerIndex > playerList.length) {
+            alert("全プレイヤーの発言が完了しました。");
+            sessionStorage.removeItem("currentPlayer"); // リセット
+            location.href = "./confirmation.html?nx=vote";
             return;
         }
 
         // 次のプレイヤー番号をセッションストレージに保存
-        sessionStorage.setItem("currentPlayer", nextPlayer);
+        currentPlayer = nextPlayerIndex; // 現在のプレイヤーを更新
+        sessionStorage.setItem("currentPlayer", currentPlayer);
 
-        // 本人確認ページに戻る
+        // 本人確認ページに遷移
         location.href = "./confirmation.html?nx=speech";
     }
 

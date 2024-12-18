@@ -57,12 +57,34 @@
     const nextPage = params.get("nx");
     console.log("Next page parameter:", nextPage);
 
-    // currentPlayer をセッションから取得、デフォルトは 1
-    let currentPlayer = parseInt(sessionStorage.getItem("currentPlayer")) || 1;
+    // プレイヤーデータが存在しない場合のエラー処理
+    if (!players || players.length === 0) {
+        console.error("プレイヤーデータが見つかりません");
+        throw new Error("プレイヤーデータがありません");
+    }
+
+    // 現在のプレイヤー番号を取得
+    let currentPlayerNumber = sessionStorage.getItem("currentPlayer")
+        ? parseInt(sessionStorage.getItem("currentPlayer"))
+        : 1;
+
+    // 1番が死亡している場合、生きている最も若い番号のプレイヤーを探す
+    if (players[currentPlayerNumber - 1]?.status !== "alive") {
+        for (let i = 0; i < players.length; i++) {
+            if (players[i].status === "alive") {
+                currentPlayerNumber = i + 1; // プレイヤー番号は配列インデックス+1
+                break;
+            }
+        }
+    }
+
+    // 現在のプレイヤー番号をセッションストレージに保存
+    sessionStorage.setItem("currentPlayer", currentPlayerNumber);
+
+    console.log(`現在のプレイヤー番号: ${currentPlayerNumber}`);
 
     // 現在のプレイヤーを表示
-    console.log(`Current Player: ${currentPlayer}, Status: ${players[currentPlayer - 1]?.status}`);
-    document.getElementById("playerNumber").textContent = currentPlayer;
+    document.getElementById("playerNumber").textContent = currentPlayerNumber;
 
     // 日付取得
     let day = parseInt(sessionStorage.getItem("day") || "0", 10); // "0" を初期値として使用    

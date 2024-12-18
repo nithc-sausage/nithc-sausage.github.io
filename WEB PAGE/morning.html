@@ -63,7 +63,6 @@
     const players = playersRaw ? JSON.parse(playersRaw) : null;
 
 
-
     // プレイヤーデータが存在しない場合のエラー処理
     if (!players || players.length === 0) {
         console.error("プレイヤーデータがありません");
@@ -113,7 +112,7 @@
             alert(`プレイヤー${deadPlayer}が見つかりませんでした。`);
         }
     } else if (day == "1") {
-        messageElement.textContent = "盗食による退寮者が発生した。";
+        messageElement.textContent = "退寮者が発生した。";
     } else {
         messageElement.textContent = "誰も退寮しなかった。";
     }

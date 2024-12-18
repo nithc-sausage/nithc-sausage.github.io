@@ -23,11 +23,7 @@
         </div>
 
 
-        <div class="row gy-3">
-            <div class="text-center">
-                <p>あなたの役職は <span id="role"></span> です。</p>
-            </div>
-        </div>
+
 
         <div id="content" class="text-center">
             <h1>役職情報</h1>
@@ -44,11 +40,26 @@
 
 <script>
     let day = parseInt(sessionStorage.getItem('day') || "0", 10);
-
+    // セッションストレージからプレイヤーデータを取得
+    const playersRaw = sessionStorage.getItem("players");
+    const players = playersRaw ? JSON.parse(playersRaw) : null;
     // 現在のプレイヤー番号を取得
-    const currentPlayerNumber = sessionStorage.getItem("currentPlayer")
+    let currentPlayerNumber = sessionStorage.getItem("currentPlayer")
         ? parseInt(sessionStorage.getItem("currentPlayer"))
         : 1;
+
+    // 1番が死亡している場合、生きている最も若い番号のプレイヤーを探す
+    if (players[currentPlayerNumber - 1]?.status !== "alive") {
+        for (let i = 0; i < players.length; i++) {
+            if (players[i].status === "alive") {
+                currentPlayerNumber = i + 1; // プレイヤー番号は配列インデックス+1
+                break;
+            }
+        }
+    }
+
+    // 現在のプレイヤー番号をセッションストレージに保存
+    sessionStorage.setItem("currentPlayer", currentPlayerNumber);
 
     // セッションストレージからプレイヤーデータを取得
     const playerDataRaw = sessionStorage.getItem("players");
@@ -63,7 +74,6 @@
     } else {
         // 現在のプレイヤーの役職を表示
         const playerRole = currentPlayerData.yakushoku || "役職が設定されていません";
-        document.getElementById("role").textContent = playerRole;
 
         // 役職に応じた処理
         const roleMessageElement = document.getElementById("roleMessage");
@@ -219,115 +229,56 @@
 
             case "騎士":
                 roleMessageElement.textContent = "あなたは騎士です。一人を守ることができます。";
+                // ドロップダウンを追加
+                const kisiDropdown = document.createElement("select");
                 if (day != 0) {
                     // ドロップダウンを追加
                     const kisiDropdown = document.createElement("select");
-                    if (day != 0) {
-                        // ドロップダウンを追加
-                        const kisiDropdown = document.createElement("select");
-                        kisiDropdown.id = "targetSelect";
-                        kisiDropdown.className = "form-select";
-
-                        // 初期値を追加
-                        const kisiDefaultOption = document.createElement("option");
-                        kisiDefaultOption.textContent = "守る対象を選んでください";
-                        kisiDefaultOption.value = "";
-                        kisiDropdown.appendChild(kisiDefaultOption);
-
-                        // 生存プレイヤーの一覧を取得して追加
-                        playerList.forEach(player => {
-                            if (player.status === "alive" && player.id !== currentPlayerData.id) {
-                                const kisiOption = document.createElement("option");
-                                kisiOption.textContent = `プレイヤー ${player.id}`;
-                                kisiOption.value = player.id;
-                                kisiDropdown.appendChild(kisiOption);
-                            }
-                        });
-
-                        // ドロップダウンをDOMに追加
-                        actionArea.appendChild(kisiDropdown);
-
-                        // 決定ボタンを追加
-                        const kisiConfirmButton = document.createElement("button");
-                        kisiConfirmButton.textContent = "決定";
-                        kisiConfirmButton.className = "btn btn-danger mt-3";
-                        kisiConfirmButton.onclick = () => {
-                            const targetId = kisiDropdown.value;
-                            if (!targetId) {
-                                alert("守る対象を選んでください！");
-                            } else {
-                                alert(`プレイヤー ${targetId} を守ることに決定しました。`);
-                                const targetPlayer = playerList.find(p => p.id === parseInt(targetId, 10));
-                                if (targetPlayer) {
-                                    sessionStorage.setItem("kisi", targetId);
-
-                                    nextPlayer();
-                                }
-                            }
-                        };
-                        actionArea.appendChild(kisiConfirmButton);
-                    }
-                    else {
-                        // 決定ボタンを追加
-                        ConfirmButton.textContent = "初日は行動不可";
-                        ConfirmButton.className = "btn btn-danger mt-3";
-                        ConfirmButton.onclick = () => {
-                            nextPlayer();
-                        }
-                        // ボタンをDOMに追加
-                        actionArea.appendChild(ConfirmButton);
-                    } Dropdown.id = "targetSelect";
-                    wolfDropdown.className = "form-select";
+                    kisiDropdown.id = "targetSelect";
+                    kisiDropdown.className = "form-select";
 
                     // 初期値を追加
-                    const wolfDefaultOption = document.createElement("option");
-                    wolfDefaultOption.textContent = "殺す対象を選んでください";
-                    wolfDefaultOption.value = "";
-                    wolfDropdown.appendChild(wolfDefaultOption);
+                    const kisiDefaultOption = document.createElement("option");
+                    kisiDefaultOption.textContent = "守る対象を選んでください";
+                    kisiDefaultOption.value = "";
+                    kisiDropdown.appendChild(kisiDefaultOption);
 
                     // 生存プレイヤーの一覧を取得して追加
                     playerList.forEach(player => {
                         if (player.status === "alive" && player.id !== currentPlayerData.id) {
-                            const wolfOption = document.createElement("option");
-                            wolfOption.textContent = `プレイヤー ${player.id}`;
-                            wolfOption.value = player.id;
-                            wolfDropdown.appendChild(wolfOption);
+                            const kisiOption = document.createElement("option");
+                            kisiOption.textContent = `プレイヤー ${player.id}`;
+                            kisiOption.value = player.id;
+                            kisiDropdown.appendChild(kisiOption);
                         }
                     });
 
                     // ドロップダウンをDOMに追加
-                    actionArea.appendChild(wolfDropdown);
+                    actionArea.appendChild(kisiDropdown);
 
                     // 決定ボタンを追加
-                    const wolfConfirmButton = document.createElement("button");
-                    wolfConfirmButton.textContent = "決定";
-                    wolfConfirmButton.className = "btn btn-danger mt-3";
-                    wolfConfirmButton.onclick = () => {
-                        const targetId = wolfDropdown.value;
+                    const kisiConfirmButton = document.createElement("button");
+                    kisiConfirmButton.textContent = "決定";
+                    kisiConfirmButton.className = "btn btn-danger mt-3";
+                    kisiConfirmButton.onclick = () => {
+                        const targetId = kisiDropdown.value;
                         if (!targetId) {
-                            alert("殺す対象を選んでください！");
+                            alert("守る対象を選んでください！");
                         } else {
-                            alert(`プレイヤー ${targetId} を殺すことに決定しました。`);
-                            // 対象プレイヤーを殺害状態に変更
+                            alert(`プレイヤー ${targetId} を守ることに決定しました。`);
                             const targetPlayer = playerList.find(p => p.id === parseInt(targetId, 10));
                             if (targetPlayer) {
-                                sessionStorage.setItem("dead", targetId);
+                                sessionStorage.setItem("kisi", targetId);
 
-
-                                /*
-                                targetPlayer.status = "dead";
-                                sessionStorage.setItem("players", JSON.stringify(playerList));
-                                console.log(`プレイヤー ${targetId} が殺されました。`);
-                                */
                                 nextPlayer();
                             }
                         }
                     };
-                    actionArea.appendChild(wolfConfirmButton);
+                    actionArea.appendChild(kisiConfirmButton);
                 }
                 else {
                     // 決定ボタンを追加
-                    ConfirmButton.textContent = "次へ進む";
+                    ConfirmButton.textContent = "初日は行動不可";
                     ConfirmButton.className = "btn btn-danger mt-3";
                     ConfirmButton.onclick = () => {
                         nextPlayer();
@@ -335,6 +286,7 @@
                     // ボタンをDOMに追加
                     actionArea.appendChild(ConfirmButton);
                 }
+
                 break;
 
             case "バカ":
@@ -387,6 +339,8 @@
                     const bakaj = sessionStorage.getItem("baka_jinro");
                     if (role != bakaj) {
                         role = "市民陣営";
+                    } else {
+                        role = "人狼";
                     }
 
                     // 結果を表示
@@ -428,6 +382,21 @@
                 // ボタンをDOMに追加
                 actionArea.appendChild(confirmButton);
                 break;
+
+
+            case "パン屋":
+                roleMessageElement.textContent = "あなたはシダックスです。あなたが生きている間は寮でご飯が食べられます。";
+                // 決定ボタンを追加
+                ConfirmButton.textContent = "次へ進む";
+                ConfirmButton.className = "btn btn-danger mt-3";
+                ConfirmButton.onclick = () => {
+                    nextPlayer();
+                }
+                // ボタンをDOMに追加
+                actionArea.appendChild(ConfirmButton);
+                break;
+
+
 
 
 
