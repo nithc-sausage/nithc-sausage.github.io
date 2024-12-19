@@ -31,7 +31,13 @@
         </div>
 
         <div class="text-center gy-3">
-            <button type="button" class="btn btn-primary" onclick="vote()">投票</button>
+            <button type="button" class="btn btn-primary mb-3" onclick="vote()">投票</button>
+
+            <div id="dokusai" style="display: none;">
+                独裁ボタン
+            </div>
+            <button id="dokusaiButton" class="btn btn-danger" style="display: none;">独裁を発動する</button>
+
         </div>
 
     </div>
@@ -41,16 +47,19 @@
 <script>
     // セッションストレージからプレイヤーデータを取得
     const playersRaw = sessionStorage.getItem("players");
-    const players = playersRaw ? JSON.parse(playersRaw) : null;
+    const players = playersRaw ? JSON.parse(playersRaw) : [];
 
     // プレイヤーデータが存在しない場合のエラー処理
-    if (!players || players.length === 0) {
+    if (!players.length) {
         console.error("プレイヤーデータが見つかりません");
         throw new Error("プレイヤーデータがありません");
     }
 
     // 現在のプレイヤー番号を取得または初期化
     let currentPlayer = parseInt(sessionStorage.getItem("currentPlayer") || "1", 10);
+
+    // 現在のプレイヤーデータ
+    const currentPlayerData = players[currentPlayer - 1];
 
     // ドロップダウンの要素を取得
     const voteSelect = document.getElementById("voteSelect");
@@ -73,31 +82,23 @@
         while (nextPlayerIndex <= players.length) {
             const nextPlayer = players[nextPlayerIndex - 1]; // 配列インデックス調整
             if (nextPlayer?.status === "alive") {
-                console.log(`次のプレイヤー番号: ${nextPlayerIndex}`);
-                break;
+                currentPlayer = nextPlayerIndex; // 次のプレイヤー番号を更新
+                sessionStorage.setItem("currentPlayer", currentPlayer);
+                location.href = "./confirmation.html?nx=vote";
+                return;
             }
             nextPlayerIndex++;
         }
 
         // 全員の行動が完了した場合
-        if (nextPlayerIndex > players.length) {
-            alert("全プレイヤーの行動が完了しました。");
-            sessionStorage.removeItem("currentPlayer"); // リセット
-            location.href = "./shokei.html";
-            return;
-        }
-
-        // 次のプレイヤー番号をセッションストレージに保存
-        currentPlayer = nextPlayerIndex;
-        sessionStorage.setItem("currentPlayer", currentPlayer);
-
-        // 本人確認ページに遷移
-        location.href = "./confirmation.html?nx=vote";
+        alert("全プレイヤーの行動が完了しました。");
+        sessionStorage.removeItem("currentPlayer"); // リセット
+        location.href = "./shokei.html";
     }
 
     // 投票先の保存
     function vote() {
-        const targetPlayerNumber = document.getElementById("voteSelect").value; // セレクトボックスの選択値を取得
+        const targetPlayerNumber = voteSelect.value;
 
         if (!targetPlayerNumber) {
             alert("投票先を選択してください。");
@@ -116,4 +117,39 @@
         // 次のプレイヤーに進む
         nextPlayer();
     }
+
+    // セッションストレージに dokusai フラグがあるか確認
+    const dokusaiUsed = sessionStorage.getItem("dokusaiUsed") === "true";
+
+    // 独裁ボタンの制御
+    if (currentPlayerData?.yakushoku === "独裁者" && !dokusaiUsed) {
+        document.getElementById("dokusai").style.display = "block";
+        const dokusaiButton = document.getElementById("dokusaiButton");
+        dokusaiButton.style.display = "block";
+
+        dokusaiButton.addEventListener("click", () => {
+            const targetPlayerNumber = document.getElementById("voteSelect").value;
+
+            if (!targetPlayerNumber) {
+                alert("ターゲットを選択してください。");
+                return;
+            }
+
+            // セッションストレージにフラグを立てる
+            sessionStorage.setItem("dokusaiUsed", "true");
+            sessionStorage.setItem("dokusaiTarget", targetPlayerNumber);
+            alert(`独裁が発動されました！ターゲット: プレイヤー${targetPlayerNumber}`);
+
+            // ボタンを無効化して非表示に
+            dokusaiButton.disabled = true;
+            dokusaiButton.style.display = "none";
+            document.getElementById("dokusai").style.display = "none";
+            vote();
+        });
+    } else {
+        // 独裁ボタンが表示されないようにする
+        document.getElementById("dokusai").style.display = "none";
+        document.getElementById("dokusaiButton").style.display = "none";
+    }
+
 </script>

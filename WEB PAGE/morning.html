@@ -47,9 +47,6 @@
 </body>
 
 
-
-
-
 <script>
     // 日付更新
     let day = parseInt(sessionStorage.getItem('day') || "0", 10); // "0" を初期値として使用
@@ -85,6 +82,7 @@
         }
     });
 
+
     // 勝利条件を判定
     const messageElement = document.getElementById("message");
     const nextButton = document.getElementById("nextButton");
@@ -117,10 +115,10 @@
         messageElement.textContent = "誰も退寮しなかった。";
     }
 
+
     // 投票データを取得（デバッグ用）
     const votes = JSON.parse(sessionStorage.getItem("votes") || "{}");
     console.log(votes);
-
 
     // セッションストレージからプレイヤーデータを取得
     const playersData = JSON.parse(sessionStorage.getItem("players") || "[]");
@@ -143,9 +141,6 @@
     } else {
         console.log("役職が「パン屋」のプレイヤーが見つかりませんでした。");
     }
-
-
-
 
 
     function proceedToNextPage(event) {

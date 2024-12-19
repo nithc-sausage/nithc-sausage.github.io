@@ -59,7 +59,7 @@
             if (counter < 0) {
                 clearInterval(countdownInterval);
                 // 本人確認ページに戻る
-                location.href = "./confirmation.html?nx=speech"; // 個人会議
+                location.href = "./confirmation.html?nx=vote"; // 個人会議
             }
         }, 1000);
     }
@@ -67,7 +67,7 @@
     // スキップボタンを押した時の動作
     function skipCountdown() {
         clearInterval(countdownInterval); // カウントダウンを停止
-        location.href = "./confirmation.html?nx=speech"; // 個人会議
+        location.href = "./confirmation.html?nx=vote"; // 個人会議
     }
 
 </script>

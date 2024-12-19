@@ -65,6 +65,9 @@
     const playerDataRaw = sessionStorage.getItem("players");
     const playerList = playerDataRaw ? JSON.parse(playerDataRaw) : [];
 
+    // セッションストレージからプレイヤーデータを取得
+    const playersData = JSON.parse(sessionStorage.getItem("players") || "[]");
+
     // 現在のプレイヤー情報を取得
     const currentPlayerData = playerList[currentPlayerNumber - 1];
 
@@ -227,6 +230,48 @@
                 actionArea.appendChild(ConfirmButton);
                 break;
 
+            case "市民３":
+                roleMessageElement.textContent = "あなたは市民です。協力して人狼を見つけましょう！";
+                // 決定ボタンを追加
+                ConfirmButton.textContent = "次へ進む";
+                ConfirmButton.className = "btn btn-danger mt-3";
+                ConfirmButton.onclick = () => {
+                    nextPlayer();
+                }
+                // ボタンをDOMに追加
+                actionArea.appendChild(ConfirmButton);
+                break;
+
+
+            case "独裁者":
+                roleMessageElement.textContent = "あなたは独裁者です。人狼陣営です。一度だけ任意の人を追放できます。";
+
+                
+
+                // 人狼プレイヤーのIDを取得
+                const kyojinPlayers = playersData
+                    .filter(player => player.yakushoku === "狂人") // 役職が「人狼」のプレイヤーを探す
+                    .map(player => player.id); // IDだけを取得
+
+                if (kyojinPlayers.length > 0) {
+                    // 配列を文字列として表示するために join を使用
+                    alert(`プレイヤー ${kyojinPlayers.join(", ")} が狂人です。`);
+                } else {
+                    alert("人狼が見つかりませんでした。");
+                }
+
+
+
+                // 決定ボタンを追加
+                ConfirmButton.textContent = "次へ進む";
+                ConfirmButton.className = "btn btn-danger mt-3";
+                ConfirmButton.onclick = () => {
+                    nextPlayer();
+                }
+                // ボタンをDOMに追加
+                actionArea.appendChild(ConfirmButton);
+                break;
+
             case "騎士":
                 roleMessageElement.textContent = "あなたは騎士です。一人を守ることができます。";
                 // ドロップダウンを追加
@@ -355,9 +400,6 @@
 
             case "狂人":
                 roleMessageElement.textContent = "あなたは狂人です。人狼の手助けをしよう。";
-
-                // セッションストレージからプレイヤーデータを取得
-                const playersData = JSON.parse(sessionStorage.getItem("players") || "[]");
 
                 // 人狼プレイヤーのIDを取得
                 const wolfPlayers = playersData

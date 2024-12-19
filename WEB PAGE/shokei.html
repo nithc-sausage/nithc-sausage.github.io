@@ -8,14 +8,7 @@
     <link href="./bootstrap-5.3.0-dist/css/bootstrap.css" rel="stylesheet">
 </head>
 
-
-
-
-
-
 <body>
-
-
     <div class="container-sm">
         <div class="row gy-3">
             <figure class="text-center">
@@ -33,10 +26,8 @@
                 <h5>DAY<span id="day"></span></h5>
                 <h5>
                     <div class="text-center">
-                        <div>
-                            <p><span id="dead"></span> 番のプレイヤーが処刑されました。</p>
-                            <p><span id="message"></span></p>
-                        </div>
+                        <p><span id="dead"></span> 番のプレイヤーが処刑されました。</p>
+                        <p><span id="message"></span></p>
                     </div>
                 </h5>
             </div>
@@ -54,73 +45,59 @@
 </body>
 
 <script>
+    // 初期データの取得
     let day = parseInt(sessionStorage.getItem('day') || "0", 10); // "0" を初期値として使用
     document.getElementById("day").textContent = day;
 
+    const playersData = JSON.parse(sessionStorage.getItem("players") || "[]");
     const votes = JSON.parse(sessionStorage.getItem("votes") || "{}");
-    console.log(votes);
 
-    // 投票数を集計
-    const voteCounts = Object.values(votes).reduce((counts, vote) => {
-        counts[vote] = (counts[vote] || 0) + 1;
-        return counts;
-    }, {});
+    // 独裁者が発動した場合、通常の投票結果は無効
+    const dokusaiTarget = sessionStorage.getItem("dokusaiTarget");
+    let executedPlayer = null;
 
-    // 最も多くの票を得たプレイヤーを特定
-    let maxVotes = 0;
-    let deadPlayer = null;
+    if (dokusaiTarget) {
+        // 独裁が発動された場合
+        executedPlayer = parseInt(dokusaiTarget, 10);
+        console.log(`独裁によってプレイヤー${executedPlayer}が選ばれました。`);
+    } else {
+        // 独裁が発動していない場合、通常の投票結果で処刑対象を決定
+        const voteCounts = Object.values(votes).reduce((counts, vote) => {
+            counts[vote] = (counts[vote] || 0) + 1;
+            return counts;
+        }, {});
 
-    for (const [player, count] of Object.entries(voteCounts)) {
-        if (count > maxVotes) {
-            maxVotes = count;
-            deadPlayer = parseInt(player); // プレイヤー番号を整数に変換
+        let maxVotes = 0;
+        for (const [player, count] of Object.entries(voteCounts)) {
+            if (count > maxVotes) {
+                maxVotes = count;
+                executedPlayer = parseInt(player); // プレイヤー番号を整数に変換
+            }
         }
+
+        console.log(`投票によりプレイヤー${executedPlayer}が処刑されます。`);
     }
 
-    if (deadPlayer !== null) {
-        // セッションストレージからプレイヤーデータを取得
-        const playersData = JSON.parse(sessionStorage.getItem("players") || "[]");
-
-        // 処刑者のステータスを更新
-        const playerToUpdate = playersData.find(player => player.id === deadPlayer);
-        if (playerToUpdate) {
-            playerToUpdate.status = "dead";
-            sessionStorage.setItem("players", JSON.stringify(playersData)); // データを再保存
-            sessionStorage.setItem("dead", deadPlayer); // 処刑者の番号を保存
-            alert(`処刑者はプレイヤー${deadPlayer}です！`);
+    // 処刑結果を反映
+    if (executedPlayer) {
+        const playerToExecute = playersData.find(player => player.id === executedPlayer);
+        if (playerToExecute) {
+            playerToExecute.status = "dead";
+            sessionStorage.setItem("players", JSON.stringify(playersData)); // 更新データを保存
+            document.getElementById("dead").textContent = executedPlayer; // 処刑されたプレイヤー番号を表示
+            alert(`プレイヤー${executedPlayer}が処刑されました。`);
         } else {
-            alert(`プレイヤー${deadPlayer}が見つかりませんでした。`);
+            alert(`処刑対象のプレイヤー${executedPlayer}が見つかりませんでした。`);
         }
     } else {
-        alert("処刑者を決定できませんでした。");
-    }
-    console.log(deadPlayer);
-
-    document.getElementById("dead").textContent = deadPlayer;
-
-    function clearAndProceed() {
-        // セッションストレージの 'votes' をクリア
-        sessionStorage.removeItem("votes");
-
-        // 次のページに遷移
-        window.location.href = "./confirmation.html?nx=role";
+        alert("処刑対象はいませんでした。");
     }
 
-    // プレイヤーデータを取得
-    const playersRaw = sessionStorage.getItem("players");
-    const players = playersRaw ? JSON.parse(playersRaw) : null;
-
-    // プレイヤーデータが存在しない場合のエラー処理
-    if (!players || players.length === 0) {
-        console.error("プレイヤーデータがありません");
-        throw new Error("Invalid player data");
-    }
-
-    // 生存している市民と人狼の人数をカウント
+    // 勝利条件の判定
     let citizenCount = 0;
     let werewolfCount = 0;
 
-    players.forEach(player => {
+    playersData.forEach(player => {
         if (player.status === "alive") {
             if (player.yakushoku === "人狼") {
                 werewolfCount++;
@@ -130,7 +107,7 @@
         }
     });
 
-    // 勝利条件を判定
+    // 勝敗を判定
     const messageElement = document.getElementById("message");
     if (werewolfCount === 0) {
         messageElement.textContent = "市民側の勝利";
@@ -142,37 +119,17 @@
         messageElement.textContent = "ゲーム続行中";
     }
 
+    // 次のページへの遷移処理
     function proceedToNextPage(event) {
-        // 日付更新
-        let day = parseInt(sessionStorage.getItem('day') || "0", 10); // "0" を初期値として使用
-        document.getElementById("day").textContent = day;
-        console.log(day);
-
-        event.preventDefault(); // ボタンのデフォルト動作をキャンセル
-
-        // ボタンのクリックイベントが複数回発生しないように disable する
-        nextButton.disabled = true;
-
-        // 市民側の勝利
-        if (werewolfCount === 0) {
-            messageElement.textContent = "市民側の勝利";
-            // 市民側の勝利時には index.html に遷移
-            window.location.href = "index.html";
-        }
-        // 人狼側の勝利
-        else if (citizenCount <= werewolfCount) {
-            messageElement.textContent = "人狼側の勝利";
-            // 人狼側の勝利時には index.html に遷移
-            window.location.href = "index.html";
-        }
-        // ゲーム続行中
-        else {
-            messageElement.textContent = "ゲーム続行中";
-            // ゲーム続行中は "./confirmation.html?nx=speech10" に遷移
-            window.location.href = "./yakushoku.html";
-        }
+        event.preventDefault();
+        // 次のページに進む処理
+        window.location.href = werewolfCount === 0 || citizenCount <= werewolfCount ? "index.html" : "./yakushoku.html";
     }
 
-    //投票データクリア
+    // 投票データのクリア
     sessionStorage.removeItem("votes");
+
+    // 独裁のリセット処理
+    sessionStorage.removeItem("dokusaiTarget"); // 次回のためにリセット
+
 </script>
