@@ -72,18 +72,17 @@
         return; // 処理を中断
       }
 
-      // 役職を優先度に基づいて並べ替え
-      const roles = ["人狼", "市民１", "パン屋", "占い師", "騎士", "バカ", "狂人", "市民２", "市民３", "独裁者"];
-      const highPriorityRoles = ["人狼"];
-      const lowPriorityRoles = ["市民３", "独裁者"];
-      const otherRoles = roles.filter(role => !highPriorityRoles.includes(role) && !lowPriorityRoles.includes(role));
+      // 役職をプレイヤー数に応じて設定
+      const roles = ["人狼", "市民１", "パン屋", "占い師", "騎士", "バカ", "狂人", "市民２"];
+      if (playersCount >= 9) {
+        roles.push("市民３");
+      }
+      if (playersCount >= 10) {
+        roles.push("独裁者");
+      }
 
-      // 高優先度、その他、低優先度の順にシャッフル
-      const shuffledRoles = [
-        ...shuffle(highPriorityRoles),
-        ...shuffle(otherRoles),
-        ...shuffle(lowPriorityRoles)
-      ];
+      // 役職をシャッフル
+      const shuffledRoles = shuffle(roles);
 
       // プレイヤーに役職を割り当てる
       players.forEach((player, index) => {
