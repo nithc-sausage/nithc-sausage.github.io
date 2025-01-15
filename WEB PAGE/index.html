@@ -27,9 +27,6 @@
     <div class="row gx-3">
       <select class="form-select" aria-label="Default select example" onchange="setPlayerStates(this.value)">
         <option selected>Select the number of players</option>
-        <option value="5">5人</option>
-        <option value="6">6人</option>
-        <option value="7">7人</option>
         <option value="8">8人</option>
         <option value="9">9人</option>
         <option value="10">10人</option>
@@ -55,75 +52,77 @@
     sessionStorage.removeItem("dokusai");
 
 
-    // プレイヤーデータをセッションストレージに保存
     function setPlayerStates(playersCount) {
       const players = [];
       for (let i = 1; i <= playersCount; i++) {
-        players.push({
-          id: i,
-          yakushoku: "", // 初期役職
-          status: "alive" // 生存状態
-        });
+          players.push({
+              id: i,
+              yakushoku: "", // 初期役職
+              status: "alive" // 生存状態
+          });
       }
-
+  
       sessionStorage.setItem("players", JSON.stringify(players));
       console.log("Players saved:", players);
-
-      // セッションストレージからプレイヤーデータを取得
+  
       const playersData = sessionStorage.getItem("players");
       console.log("Player status loaded:", playersData);
-
+  
       if (!playersData) {
-        console.error("No player data found in sessionStorage.");
-        return; // 処理を中断
+          console.error("No player data found in sessionStorage.");
+          return; // 処理を中断
       }
-
-      // 役職をシャッフル
-      const roles = ["市民１", "パン屋", "占い師", "騎士", "バカ", "狂人", "人狼", "市民２","市民３","独裁者"];
-      const shuffledRoles = shuffle([...roles]); // 元の配列を破壊しないようコピー
-
+  
+      // 役職を優先度に基づいて並べ替え
+      const roles = ["人狼", "市民１", "パン屋", "占い師", "騎士", "バカ", "狂人", "市民２", "市民３", "独裁者"];
+      const highPriorityRoles = ["人狼"];
+      const lowPriorityRoles = ["市民３", "独裁者"];
+      const otherRoles = roles.filter(role => !highPriorityRoles.includes(role) && !lowPriorityRoles.includes(role));
+  
+      // 高優先度、その他、低優先度の順にシャッフル
+      const shuffledRoles = [
+          ...shuffle(highPriorityRoles),
+          ...shuffle(otherRoles),
+          ...shuffle(lowPriorityRoles)
+      ];
+  
       // プレイヤーに役職を割り当てる
       players.forEach((player, index) => {
-        if (index < shuffledRoles.length) {
-          player.yakushoku = shuffledRoles[index];
-        }
+          if (index < shuffledRoles.length) {
+              player.yakushoku = shuffledRoles[index];
+          }
       });
-
-      // 更新したプレイヤーデータをセッションストレージに再保存
+  
       sessionStorage.setItem("players", JSON.stringify(players));
       console.log("Roles assigned and saved:", players);
-
-      // デバッグ: セッションストレージのデータを再取得して確認
+  
       const updatedPlayersData = sessionStorage.getItem("players");
       console.log("Updated Players in sessionStorage:", JSON.parse(updatedPlayersData));
-
-      //バカのための関数
-      // 役職が存在する場合にランダムで1つ選択（ただし "バカ" は除外）
+  
+      // バカのための関数
       if (roles.length > 0) {
-        let randomRole;
-        do {
-          const randomIndex = Math.floor(Math.random() * roles.length);
-          randomRole = roles[randomIndex];
-        } while (randomRole === "バカ"); // 抽選結果が "バカ" の場合、再抽選
-
-        console.log(`バカ視点人狼: ${randomRole}`);
-        sessionStorage.setItem("baka_jinro",randomRole);
+          let randomRole;
+          do {
+              const randomIndex = Math.floor(Math.random() * roles.length);
+              randomRole = roles[randomIndex];
+          } while (randomRole === "バカ");
+  
+          console.log(`バカ視点人狼: ${randomRole}`);
+          sessionStorage.setItem("baka_jinro", randomRole);
       } else {
-        console.log("役職が見つかりませんでした。");
-        alert("役職が見つかりませんでした。");
+          console.log("役職が見つかりませんでした。");
+          alert("役職が見つかりませんでした。");
       }
-
-    };
-
-    // 配列をシャッフルする関数
-    function shuffle(array) {
+  }
+  
+  // 配列をシャッフルする関数
+  function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
       }
       return array;
-    }
-
+  }
 
 
 
